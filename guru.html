@@ -96,8 +96,8 @@
   </div>
 
   <script>
-  // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI:
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAfpgvXOYgzXV6cddkUa6tvDmOBFw_46tDoL1bg1yO1MeUd0cHNJU8cyerC36cgtVxMA/exec";
+  // Ganti URL di bawah ini dengan URL Web App hasil Deploy terbaru Anda:
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1vy0AU_s25TPOvu2l4B54h_LHL1KVZKm9lYtLFQmTk4qUxvm1CVDZDPOb_07CoURUHA/exec";
 
   let fetchedExamHistory = [];
 
@@ -108,7 +108,7 @@
 
   // Mengambil token aktif dari Cloud saat dashboard dibuka
   function loadLiveToken() {
-    fetch(`${SCRIPT_URL}?action=getToken`)
+    fetch(`${SCRIPT_URL}?action=getToken`, { method: "GET", redirect: "follow" })
       .then(res => res.json())
       .then(data => {
         if (data && data.token) {
@@ -126,7 +126,7 @@
     const statusEl = document.getElementById('statusText');
     statusEl.innerText = "Status: Menyimpan token ke cloud...";
 
-    fetch(`${SCRIPT_URL}?action=setToken&token=${encodeURIComponent(newToken)}`)
+    fetch(`${SCRIPT_URL}?action=setToken&token=${encodeURIComponent(newToken)}`, { method: "GET", redirect: "follow" })
       .then(res => res.json())
       .then(data => {
         alert(`Token ujian berhasil diperbarui di cloud secara real-time: ${data.token}`);
@@ -135,6 +135,7 @@
       .catch(err => {
         console.error(err);
         alert("Gagal memperbarui token ke server cloud!");
+        statusEl.innerText = "Status: Gagal menyimpan token.";
       });
   }
 
@@ -143,7 +144,7 @@
     const statusEl = document.getElementById('statusText');
     statusEl.innerText = "Status: Mengambil data terbaru dari Google Sheet...";
 
-    fetch(SCRIPT_URL)
+    fetch(SCRIPT_URL, { method: "GET", redirect: "follow" })
       .then(res => res.json())
       .then(data => {
         fetchedExamHistory = Array.isArray(data) ? data : [];
