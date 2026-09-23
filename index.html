@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Siswa - Ujian ASTS SMPN 4 Praya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #a8edd9 0%, #fed6e3 100%);
+      --primary: #ff6b6b;
+      --secondary: #4ecdc4;
+      --purple: #6c5ce7;
+      --purple-hover: #5a4bcf;
+      --dark: #2d3436;
+      --card-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    body { background: var(--bg-gradient); min-height: 100vh; color: var(--dark); padding: 30px 20px; }
+    .container { max-width: 800px; margin: 0 auto; }
+
+    .brand-header {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 20px 28px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+      border: 3px solid #ffffff;
+      margin-bottom: 25px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    /* Pemotongan sudut hitam pada gambar logo */
+    .brand-logo { 
+      width: 80px; 
+      height: 80px; 
+      object-fit: cover; 
+      border-radius: 50%; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    
+    .brand-text h1 { font-family: 'Fredoka', sans-serif; color: var(--purple); font-size: 1.6rem; line-height: 1.2; }
+    .brand-text p { font-size: 0.9rem; color: #636e72; font-weight: 500; margin-top: 2px; }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+      border: 3px solid #ffffff;
+      margin-bottom: 25px;
+    }
+
+    h2 { font-family: 'Fredoka', sans-serif; color: var(--purple); margin-bottom: 20px; font-size: 1.35rem; display: flex; align-items: center; gap: 10px; }
+    .form-group { margin-bottom: 15px; text-align: left; }
+    .form-group label { font-weight: 600; display: block; margin-bottom: 8px; font-size: 0.9rem; color: #4a5568; }
+    .form-control { width: 100%; padding: 12px 18px; border-radius: 14px; border: 2px solid #dfe6e9; font-size: 0.95rem; outline: none; transition: all 0.3s ease; background: #ffffff; }
+    .form-control:focus { border-color: var(--purple); box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15); }
+
+    .btn {
+      width: 100%;
+      font-family: 'Fredoka', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 14px 22px;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--purple);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(108, 92, 231, 0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn:hover { background: var(--purple-hover); transform: translateY(-2px); }
+
+    @media (max-width: 600px) {
+      .brand-header { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="brand-header">
+      <img src="logo.jpg" alt="Logo SMPN 4 Praya" class="brand-logo">
+      <div class="brand-text">
+        <h1>UJIAN ASTS SMPN 4 PRAYA</h1>
+        <p>Portal Lembar Kerja & Ujian Online Siswa</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><i class="fa-solid fa-user-pen"></i> Data Peserta Ujian</h2>
+      <form id="examLoginForm" onsubmit="startExam(event)">
+        <div class="form-group">
+          <label for="studentName">Nama Lengkap Siswa</label>
+          <input type="text" id="studentName" class="form-control" placeholder="Masukkan nama lengkap Anda" required>
+        </div>
+        <div class="form-group">
+          <label for="studentClass">Kelas</label>
+          <select id="studentClass" class="form-control" required>
+            <option value="">-- Pilih Kelas --</option>
+            <option value="7.1">Kelas 7.1</option>
+            <option value="7.2">Kelas 7.2</option>
+            <option value="7.3">Kelas 7.3</option>
+            <option value="8.1">Kelas 8.1</option>
+            <option value="8.2">Kelas 8.2</option>
+            <option value="9.1">Kelas 9.1</option>
+            <option value="9.2">Kelas 9.2</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="subjectName">Mata Pelajaran</label>
+          <input type="text" id="subjectName" class="form-control" placeholder="Contoh: Bahasa Indonesia" required>
+        </div>
+        <div class="form-group">
+          <label for="examToken">Token Ujian</label>
+          <input type="text" id="examToken" class="form-control" placeholder="Masukkan token dari guru" required>
+        </div>
+        <button type="submit" class="btn"><i class="fa-solid fa-right-to-bracket"></i> Mulai Kerjakan Ujian</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function startExam(e) {
+      e.preventDefault();
+      const tokenInput = document.getElementById('examToken').value.trim();
+      const activeToken = localStorage.getItem('activeExamToken') || "SMP99";
+
+      if (tokenInput.toUpperCase() !== activeToken.toUpperCase()) {
+        alert("Token Ujian Salah! Silakan tanyakan token aktif kepada guru pengawas.");
+        return;
+      }
+
+      alert("Token Valid! Selamat mengerjakan ujian.");
+    }
+  </script>
+</body>
+</html>
