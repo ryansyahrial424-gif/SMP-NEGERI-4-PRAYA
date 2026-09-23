@@ -413,7 +413,7 @@
       const studentClass = document.getElementById('studentClass').value;
       const token = document.getElementById('examToken').value.trim();
       
-      let activeToken = localStorage.getItem('activeExamToken') || "SMP99";
+      let activeToken = localStorage.getItem('activeExamToken') || "110493";
 
       if (!name) return alert("Silakan isi nama lengkap!");
       if (!token) return alert("Silakan masukkan token ujian!");
@@ -595,7 +595,7 @@
       document.getElementById('loading').style.display = 'flex';
 
       // Mengirimkan data ke Google Sheet via Google Apps Script
-      if (SCRIPT_URL && SCRIPT_URL !== "URL_WEB_APP_GOOGLE_SCRIPT_ANDA_DI_SINI") {
+      if (SCRIPT_URL && SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbw2yPgv48cRuIlC0z3clVN5CdBILpeAgSDEcVQcvTYk6jgLkaZionlRTJ9w6IGEfU5z/exechttps://script.google.com/macros/s/AKfycbw2yPgv48cRuIlC0z3clVN5CdBILpeAgSDEcVQcvTYk6jgLkaZionlRTJ9w6IGEfU5z/exec") {
         fetch(SCRIPT_URL, {
           method: 'POST',
           mode: 'no-cors',
