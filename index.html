@@ -284,7 +284,7 @@
 
   <script>
     // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI:
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2yPgv48cRuIlC0z3clVN5CdBILpeAgSDEcVQcvTYk6jgLkaZionlRTJ9w6IGEfU5z/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAfpuJ3KNLTA-u3xfY9jmw_vUqyOTmt00N_vlvi6d0ykszWJjEyvbdfZYZd4oeMe_s/exec";
 
     const bankSoalMatematika = {
       "7.1": [
@@ -408,215 +408,50 @@
     let userAnswersPG = [];
     let userAnswersEssay = [];
 
-    function startExam() {
-      const name = document.getElementById('studentName').value.trim();
-      const studentClass = document.getElementById('studentClass').value;
-      const token = document.getElementById('examToken').value.trim();
-      
-      let activeToken = localStorage.getItem('activeExamToken') || "110493";
+    async function startExam() {
+  const name = document.getElementById('studentName').value.trim();
+  const studentClass = document.getElementById('studentClass').value;
+  const token = document.getElementById('examToken').value.trim();
 
-      if (!name) return alert("Silakan isi nama lengkap!");
-      if (!token) return alert("Silakan masukkan token ujian!");
-      
-      if (token.toUpperCase() !== activeToken.toUpperCase()) {
-        return alert("Token ujian salah! Silakan minta token yang benar kepada guru pengawas.");
-      }
+  if (!name) return alert("Silakan isi nama lengkap!");
+  if (!token) return alert("Silakan masukkan token ujian!");
 
-      studentData = { name, class: studentClass, violations: 0 };
-      document.getElementById('studentBadge').innerText = `${name} (${studentClass})`;
-      showScreen('examScreen');
-      startQuiz();
+  document.getElementById('loading').style.display = 'flex';
+
+  try {
+    // Mengambil token terbaru langsung dari Google Apps Script Guru
+    const response = await fetch(SCRIPT_URL + "?action=getToken");
+    const result = await response.json();
+    document.getElementById('loading').style.display = 'none';
+
+    if (token.toUpperCase() !== result.token.toUpperCase()) {
+      return alert("Token ujian salah! Silakan minta token yang benar kepada pengawas.");
     }
+  } catch (err) {
+    document.getElementById('loading').style.display = 'none';
+    // Cadangan jika gagal terhubung ke server
+    if (token.toUpperCase() !== "110493") {
+      return alert("Token ujian salah atau koneksi internet terputus!");
+    }
+  }
+
+  studentData = { name, class: studentClass, violations: 0 };
+  document.getElementById('studentBadge').innerText = `${name} (${studentClass})`;
+  showScreen('examScreen');
+  startQuiz();
+}
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden && document.getElementById('examScreen').classList.contains('active')) {
         studentData.violations++;
-        document.getElementById('violWarning').innerText = `Perhatian: Dilarang berpindah tab! (Total Pelanggaran: ${studentData.violations})`;
-        alert(`Peringatan! Terdeteksi berpindah tab! (Pelanggaran ke-${studentData.violations})`);
+        document.getElementById('violWarning').innerText = `Perhatian: Dilarang berpindah tab! (Pelanggaran: ${studentData.violations})`;
+        alert(`Peringatan! Anda terdeteksi meninggalkan halaman ujian (${studentData.violations}x).`);
       }
     });
 
-    function showScreen(id) {
+    function showScreen(screenId) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
-
-    function loadSubject(subj, btn) {
-      document.querySelectorAll('.mapel-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      currentSubject = subj;
-      startQuiz();
-    }
-
-    function getQuestions() {
-      if (currentSubject === 'mtk') {
-        if (bankSoalMatematika[studentData.class]) {
-          return bankSoalMatematika[studentData.class];
-        }
-      }
-      return [];
-    }
-
-    function startQuiz() {
-      currentIdx = 0;
-      userAnswersPG = [];
-      userAnswersEssay = [];
-      showQuestion();
-    }
-
-    function showQuestion() {
-      const questions = getQuestions();
-      const contentArea = document.getElementById('quizContent');
-      contentArea.innerHTML = '';
-
-      if (questions.length === 0) {
-        document.getElementById('sectionBadge').style.display = 'none';
-        document.getElementById('questionText').innerText = "Belum ada soal yang tersedia untuk kelas/mapel ini.";
-        document.getElementById('prevBtn').style.display = 'none';
-        document.getElementById('nextBtn').style.display = 'none';
-        document.getElementById('finishBtn').style.display = 'none';
-        return;
-      }
-
-      document.getElementById('sectionBadge').style.display = 'inline-block';
-      const qData = questions[currentIdx];
-
-      document.getElementById('prevBtn').style.display = currentIdx === 0 ? 'none' : 'inline-block';
-      if (currentIdx === questions.length - 1) {
-        document.getElementById('nextBtn').style.display = 'none';
-        document.getElementById('finishBtn').style.display = 'inline-block';
-      } else {
-        document.getElementById('nextBtn').style.display = 'inline-block';
-        document.getElementById('finishBtn').style.display = 'none';
-      }
-
-      if (qData.type === 'pg') {
-        document.getElementById('sectionBadge').innerText = "Bagian A: Pilihan Ganda";
-        document.getElementById('questionText').innerText = qData.q;
-
-        const grid = document.createElement('div');
-        grid.classList.add('options-grid');
-
-        qData.opt.forEach((option, idx) => {
-          const btn = document.createElement('button');
-          btn.classList.add('option-btn');
-          if (userAnswersPG[currentIdx] === idx) btn.classList.add('selected');
-          btn.innerText = option;
-          btn.onclick = () => selectOption(idx, btn);
-          grid.appendChild(btn);
-        });
-        contentArea.appendChild(grid);
-      } else if (qData.type === 'essay') {
-        document.getElementById('sectionBadge').innerText = "Bagian B: Soal Essay / Uraian";
-        document.getElementById('questionText').innerText = qData.q;
-
-        const textarea = document.createElement('textarea');
-        textarea.classList.add('form-control');
-        textarea.placeholder = "Tuliskan langkah-langkah penyelesaian dan jawaban Anda di sini...";
-        textarea.value = userAnswersEssay[currentIdx] || '';
-        textarea.oninput = (e) => {
-          userAnswersEssay[currentIdx] = e.target.value;
-        };
-
-        contentArea.appendChild(textarea);
-      }
-    }
-
-    function selectOption(selectedIdx, btn) {
-      document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      userAnswersPG[currentIdx] = selectedIdx;
-    }
-
-    function nextQuestion() {
-      const questions = getQuestions();
-      if (currentIdx < questions.length - 1) {
-        currentIdx++;
-        showQuestion();
-      }
-    }
-
-    function prevQuestion() {
-      if (currentIdx > 0) {
-        currentIdx--;
-        showQuestion();
-      }
-    }
-
-    function finishExam() {
-      const questions = getQuestions();
-      let unansweredQuestions = [];
-
-      questions.forEach((q, idx) => {
-        if (q.type === 'pg') {
-          if (userAnswersPG[idx] === undefined || userAnswersPG[idx] === null) {
-            unansweredQuestions.push(idx + 1);
-          }
-        } else if (q.type === 'essay') {
-          if (!userAnswersEssay[idx] || userAnswersEssay[idx].trim() === "") {
-            unansweredQuestions.push(idx + 1);
-          }
-        }
-      });
-
-      if (unansweredQuestions.length > 0) {
-        alert(`Pemberitahuan: Masih ada soal yang belum dikerjakan!\nNomor soal yang belum terjawab: ${unansweredQuestions.join(', ')}.`);
-        return;
-      }
-
-      const pgQuestions = questions.filter(q => q.type === 'pg');
-      let totalScorePG = 0;
-
-      if (pgQuestions.length > 0) {
-        const pointPerQuestion = 100 / pgQuestions.length;
-        pgQuestions.forEach((q, idx) => {
-          if (userAnswersPG[idx] === q.ans) {
-            totalScorePG += pointPerQuestion;
-          }
-        });
-      }
-
-      const essayQuestions = questions.filter(q => q.type === 'essay');
-      const essayAnswersList = essayQuestions.map((_, idx) => {
-        const globalIdx = pgQuestions.length + idx;
-        return userAnswersEssay[globalIdx] || "";
-      });
-
-      const result = {
-        time: new Date().toLocaleString('id-ID'),
-        name: studentData.name,
-        class: studentData.class,
-        subject: currentSubject.toUpperCase(),
-        score: Math.round(totalScorePG),
-        essayAnswers: essayAnswersList,
-        violations: studentData.violations
-      };
-
-      document.getElementById('loading').style.display = 'flex';
-
-      // Mengirimkan data ke Google Sheet via Google Apps Script
-      if (SCRIPT_URL && SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbw2yPgv48cRuIlC0z3clVN5CdBILpeAgSDEcVQcvTYk6jgLkaZionlRTJ9w6IGEfU5z/exechttps://script.google.com/macros/s/AKfycbw2yPgv48cRuIlC0z3clVN5CdBILpeAgSDEcVQcvTYk6jgLkaZionlRTJ9w6IGEfU5z/exec") {
-        fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(result)
-        })
-        .then(() => {
-          document.getElementById('loading').style.display = 'none';
-          showScreen('doneScreen');
-        })
-        .catch(err => {
-          console.error("Gagal mengirim ke server Google Sheet:", err);
-          document.getElementById('loading').style.display = 'none';
-          alert("Gagal terhubung ke server Google Sheet, namun jawaban disimpan lokal.");
-          showScreen('doneScreen');
-        });
-      } else {
-        document.getElementById('loading').style.display = 'none';
-        alert("PERHATIAN: URL Google Apps Script belum diisi di index.html!");
-        showScreen('doneScreen');
-      }
+      document.getElementById(screenId).classList.add('active');
     }
   </script>
 </body>
