@@ -97,7 +97,7 @@
 
   <script>
     // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI:
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyVqcUU3XnsK6YV-qOv1imv-loIuhNep2AAMi7HeP28nvUVt1YPkCZdYfG1zzElQ5hj/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQbUbpewGpqlwKKGZnPYfzbIxamJpJsoc0ZNRxoxQdEzMMggralRIQB72Bv_jXzRyM/exec";
 
     let fetchedExamHistory = [];
 
@@ -117,7 +117,7 @@
     function fetchLiveResults() {
       const statusEl = document.getElementById('statusText');
       
-      if (!SCRIPT_URL || SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyVqcUU3XnsK6YV-qOv1imv-loIuhNep2AAMi7HeP28nvUVt1YPkCZdYfG1zzElQ5hj/exec") {
+      if (!SCRIPT_URL || SCRIPT_URL === "https://script.google.com/macros/s/AKfycbwQbUbpewGpqlwKKGZnPYfzbIxamJpJsoc0ZNRxoxQdEzMMggralRIQB72Bv_jXzRyM/exec") {
         statusEl.innerText = "Status: URL Google Apps Script belum diatur!";
         return;
       }
