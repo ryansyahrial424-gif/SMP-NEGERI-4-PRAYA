@@ -171,7 +171,7 @@
       <div class="flex-row" style="margin-bottom: 20px;">
         <div class="form-group" style="flex: 1; margin-bottom:0;">
           <label>Atur Token Ujian Aktif</label>
-          <input type="text" id="tokenInput" class="form-control" placeholder="Contoh: 110493">
+          <input type="text" id="tokenInput" class="form-control" placeholder="Contoh: SMP99">
         </div>
         <button class="btn btn-primary" style="margin-top: 24px;" onclick="saveToken()"><i class="fa-solid fa-key"></i> Simpan Token</button>
       </div>
@@ -223,30 +223,46 @@
 
   <script>
     // MASUKKAN URL GOOGLE APPS SCRIPT ANDA DI SINI:
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2yPgv48cRuIlC0z3clVN5CdBILpeAgSDEcVQcvTYk6jgLkaZionlRTJ9w6IGEfU5z/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAfpuJ3KNLTA-u3xfY9jmw_vUqyOTmt00N_vlvi6d0ykszWJjEyvbdfZYZd4oeMe_s/exec";
 
     let fetchedExamHistory = [];
 
     window.onload = function() {
-      const activeToken = localStorage.getItem('activeExamToken') || "110493";
-      document.getElementById('tokenInput').value = activeToken;
-      fetchLiveResults();
-    };
+  loadLiveToken();
+  fetchLiveResults();
+};
 
-    function saveToken() {
-      const newToken = document.getElementById('tokenInput').value.trim();
-      if (!newToken) return alert("Token tidak boleh kosong!");
-      localStorage.setItem('activeExamToken', newToken);
-      alert(`Token ujian berhasil diubah menjadi: ${newToken}`);
-    }
-
-    function fetchLiveResults() {
-      const statusEl = document.getElementById('statusText');
-      
-      if (!SCRIPT_URL || SCRIPT_URL === "https://script.google.com/macros/s/AKfycbw2yPgv48cRuIlC0z3clVN5CdBILpeAgSDEcVQcvTYk6jgLkaZionlRTJ9w6IGEfU5z/exec") {
-        statusEl.innerText = "Status: URL Google Apps Script belum diatur!";
-        return;
+// Mengambil token aktif dari Cloud saat dashboard dibuka
+function loadLiveToken() {
+  fetch(`${SCRIPT_URL}?action=getToken`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.token) {
+        document.getElementById('tokenInput').value = data.token;
       }
+    })
+    .catch(err => console.error("Gagal memuat token dari server:", err));
+}
+
+// Menyimpan token baru ke Cloud
+function saveToken() {
+  const newToken = document.getElementById('tokenInput').value.trim();
+  if (!newToken) return alert("Token tidak boleh kosong!");
+
+  const statusEl = document.getElementById('statusText');
+  statusEl.innerText = "Status: Menyimpan token ke cloud...";
+
+  fetch(`${SCRIPT_URL}?action=setToken&token=${encodeURIComponent(newToken)}`)
+    .then(res => res.json())
+    .then(data => {
+      alert(`Token ujian berhasil diperbarui di cloud secara real-time: ${data.token}`);
+      statusEl.innerText = `Status: Token aktif di cloud saat ini adalah "${data.token}"`;
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Gagal memperbarui token ke server cloud!");
+    });
+}
 
       statusEl.innerText = "Status: Mengambil data terbaru dari Google Sheet...";
 
