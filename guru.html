@@ -171,7 +171,7 @@
       <div class="flex-row" style="margin-bottom: 20px;">
         <div class="form-group" style="flex: 1; margin-bottom:0;">
           <label>Atur Token Ujian Aktif</label>
-          <input type="text" id="tokenInput" class="form-control" placeholder="Contoh: SMP99">
+          <input type="text" id="tokenInput" class="form-control" placeholder="Contoh: 110493">
         </div>
         <button class="btn btn-primary" style="margin-top: 24px;" onclick="saveToken()"><i class="fa-solid fa-key"></i> Simpan Token</button>
       </div>
@@ -228,7 +228,7 @@
     let fetchedExamHistory = [];
 
     window.onload = function() {
-      const activeToken = localStorage.getItem('activeExamToken') || "SMP99";
+      const activeToken = localStorage.getItem('activeExamToken') || "110493";
       document.getElementById('tokenInput').value = activeToken;
       fetchLiveResults();
     };
