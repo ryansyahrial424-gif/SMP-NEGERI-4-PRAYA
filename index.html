@@ -304,7 +304,7 @@
 
   <script>
     // URL GOOGLE APPS SCRIPT
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwWUfUzM7gqsU6arY9FIohK2Kft8RUl-ZFfCBG58EnPoASRqmKH8mFbVxwztuXjCTd-5A/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyaJ6A8M_1CSRPZSLAshkoAoViN2pjzz1B4iFHxvgZVCsV0hztShHPcVwf7VSN6MQ/exec";
 
     const bankSoalMatematika = {
       "7.1": [
@@ -630,78 +630,83 @@
     }
 
     function finishExam(forced = false) {
-      const questions = getQuestions();
-      
-      if (!forced) {
-        let unansweredQuestions = [];
+  const questions = getQuestions();
+  
+  if (!forced) {
+    let unansweredQuestions = [];
 
-        questions.forEach((q, idx) => {
-          if (q.type === 'pg') {
-            if (userAnswersPG[idx] === undefined || userAnswersPG[idx] === null) {
-              unansweredQuestions.push(idx + 1);
-            }
-          } else if (q.type === 'essay') {
-            if (!userAnswersEssay[idx] || userAnswersEssay[idx].trim() === "") {
-              unansweredQuestions.push(idx + 1);
-            }
-          }
-        });
-
-        if (unansweredQuestions.length > 0) {
-          alert(`Pemberitahuan: Masih ada soal yang belum dikerjakan!\nNomor soal yang belum terjawab: ${unansweredQuestions.join(', ')}.`);
-          return;
+    questions.forEach((q, idx) => {
+      if (q.type === 'pg') {
+        if (userAnswersPG[idx] === undefined || userAnswersPG[idx] === null) {
+          unansweredQuestions.push(idx + 1);
+        }
+      } else if (q.type === 'essay') {
+        if (!userAnswersEssay[idx] || userAnswersEssay[idx].trim() === "") {
+          unansweredQuestions.push(idx + 1);
         }
       }
+    });
 
-      const pgQuestions = questions.filter(q => q.type === 'pg');
-      let totalScorePG = 0;
+    if (unansweredQuestions.length > 0) {
+      alert(`Pemberitahuan: Masih ada soal yang belum dikerjakan!\nNomor soal yang belum terjawab: ${unansweredQuestions.join(', ')}.`);
+      return;
+    }
+  }
 
-      if (pgQuestions.length > 0) {
-        const pointPerQuestion = 100 / pgQuestions.length;
-        pgQuestions.forEach((q, idx) => {
-          if (userAnswersPG[idx] === q.ans) {
-            totalScorePG += pointPerQuestion;
-          }
-        });
+  // Hitung Nilai PG
+  let pgCount = 0;
+  let correctPG = 0;
+
+  questions.forEach((q, idx) => {
+    if (q.type === 'pg') {
+      pgCount++;
+      if (userAnswersPG[idx] === q.ans) {
+        correctPG++;
       }
+    }
+  });
 
-      const essayQuestions = questions.filter(q => q.type === 'essay');
-      const essayAnswersList = essayQuestions.map((_, idx) => {
-        const globalIdx = pgQuestions.length + idx;
-        return userAnswersEssay[globalIdx] || "";
-      });
+  const totalScorePG = pgCount > 0 ? Math.round((correctPG / pgCount) * 100) : 0;
 
-      const result = {
-        time: new Date().toLocaleString('id-ID'),
-        name: studentData.name,
-        class: studentData.class,
-        subject: currentSubject.toUpperCase(),
-        score: Math.round(totalScorePG),
-        essayAnswers: essayAnswersList,
-        violations: studentData.violations
-      };
+  // Kumpulkan Jawaban Essay
+  const essayAnswersList = [];
+  questions.forEach((q, idx) => {
+    if (q.type === 'essay') {
+      essayAnswersList.push(userAnswersEssay[idx] || "");
+    }
+  });
 
-      document.getElementById('loadingText').innerText = "Mengirim Jawaban Ke Server...";
-      document.getElementById('loading').style.display = 'flex';
+  const result = {
+    time: new Date().toLocaleString('id-ID'),
+    name: studentData.name,
+    class: studentData.class,
+    subject: currentSubject.toUpperCase(),
+    score: totalScorePG,
+    essayAnswers: essayAnswersList,
+    violations: studentData.violations
+  };
 
-      // Mengirimkan data ke Google Sheet via Google Apps Script
-      if (SCRIPT_URL && SCRIPT_URL !== "https://script.google.com/macros/s/AKfycbxAfpuJ3KNLTA-u3xfY9jmw_vUqyOTmt00N_vlvi6d0ykszWJjEyvbdfZYZd4oeMe_s/exec") {
-        fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(result)
-        })
-        .then(() => {
-          document.getElementById('loading').style.display = 'none';
-          showScreen('doneScreen');
-        })
-        .catch(err => {
-          console.error("Gagal mengirim ke server Google Sheet:", err);
-          document.getElementById('loading').style.display = 'none';
-          alert("Gagal terhubung ke server Google Sheet, namun jawaban disimpan lokal.");
-          showScreen('doneScreen');
-        });
+  document.getElementById('loadingText').innerText = "Mengirim Jawaban Ke Server...";
+  document.getElementById('loading').style.display = 'flex';
+
+  // Pengiriman POST tanpa pemicu CORS preflight
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(result)
+  })
+  .then(() => {
+    document.getElementById('loading').style.display = 'none';
+    showScreen('doneScreen');
+  })
+  .catch(err => {
+    console.error("Gagal mengirim ke server Google Sheet:", err);
+    document.getElementById('loading').style.display = 'none';
+    alert("Gagal terhubung ke server Google Sheet.");
+    showScreen('doneScreen');
+  });
+}
       } else {
         document.getElementById('loading').style.display = 'none';
         alert("PERHATIAN: URL Google Apps Script belum diisi di index.html!");
